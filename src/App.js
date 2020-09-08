@@ -89,22 +89,25 @@ class App extends Component {
     const indexSource = source.index;
     const indexTarget = target.index;
     const sameRow = source?.original?.parentId === target?.original?.parentId;
-    let dataDrag = [];
+    const sameDepth = source.depth === target.depth;
     // move level 0
-    if (source.depth === 0 && sameRow) {
-      dataDrag = update(data, {
+    if (source.depth === 0 && sameDepth && sameRow) {
+      const dataDrag = update(data, {
         $splice: [
           [indexSource, 1],
           [indexTarget, 0, data[indexSource]],
         ],
       });
+      this.setState({
+        data: dataDrag,
+      });
     }
     // move level 1
-    if (source.depth === 1 && sameRow) {
+    if (source.depth === 1 && sameDepth && sameRow) {
       const parent = flatRows.find(
         (i) => i.original.id === source.original.parentId
       );
-      dataDrag = update(data, {
+      const dataDrag = update(data, {
         [parent.index]: {
           subRows: {
             $splice: [
@@ -114,16 +117,19 @@ class App extends Component {
           },
         },
       });
+      this.setState({
+        data: dataDrag,
+      });
     }
     // move level 2
-    if (source.depth === 2 && sameRow) {
+    if (source.depth === 2 && sameDepth && sameRow) {
       const parent = flatRows.find(
         (i) => i.original.id === source.original.parentId
       );
       const grandFather = flatRows.find(
         (i) => i.original.id === parent.original.parentId
       );
-      dataDrag = update(data, {
+      const dataDrag = update(data, {
         [grandFather.index]: {
           subRows: {
             [parent.index]: {
@@ -143,10 +149,10 @@ class App extends Component {
           },
         },
       });
+      this.setState({
+        data: dataDrag,
+      });
     }
-    this.setState({
-      data: dataDrag,
-    });
   };
 
   render() {
